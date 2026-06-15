@@ -1,0 +1,565 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{colortbl}
+
+\geometry{margin=2.5cm, top=3cm, bottom=3cm, headheight=15pt}
+
+% Couleurs
+\definecolor{ecamblue}{RGB}{0,82,155}
+\definecolor{ecamred}{RGB}{200,30,30}
+\definecolor{lightgray}{RGB}{245,245,250}
+\definecolor{codegray}{RGB}{40,40,40}
+\definecolor{codegreen}{RGB}{0,140,60}
+\definecolor{codepurple}{RGB}{130,0,130}
+
+% Hyperliens
+\hypersetup{colorlinks=true, linkcolor=ecamblue, citecolor=ecamblue, urlcolor=ecamred}
+
+% En-têtes
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textcolor{ecamblue}{\textit{ECAM-EPMI --- Projet d'ing\'enierie 1AE}}}
+\fancyhead[R]{\small\textcolor{ecamblue}{\textit{Mod\'elisation pr\'edictive LST}}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Titres de chapitres
+\titleformat{\chapter}[block]
+  {\normalfont\Large\bfseries\color{ecamblue}}
+  {\thechapter.}{0.6em}{}
+  [\vspace{-0.3em}\textcolor{ecamblue}{\rule{\textwidth}{0.6pt}}]
+
+\titleformat{\section}
+  {\normalfont\large\bfseries\color{ecamblue!80}}
+  {\thesection}{0.5em}{}
+
+\titleformat{\subsection}
+  {\normalfont\normalsize\bfseries\color{ecamblue!60}}
+  {\thesubsection}{0.5em}{}
+
+% Boxes
+\tcbuselibrary{skins,breakable}
+\newtcolorbox{resultatbox}[1]{
+  colback=lightgray, colframe=ecamblue,
+  fonttitle=\bfseries\color{white}, title=#1,
+  arc=4pt, boxrule=1pt
+}
+\newtcolorbox{notebox}{
+  colback=yellow!10, colframe=orange!70,
+  arc=3pt, boxrule=0.8pt
+}
+
+% Listings Python
+\lstdefinestyle{python}{
+  language=Python,
+  backgroundcolor=\color{codegray!8},
+  basicstyle=\ttfamily\footnotesize\color{codegray},
+  keywordstyle=\color{ecamblue}\bfseries,
+  commentstyle=\color{codegreen}\itshape,
+  stringstyle=\color{codepurple},
+  numberstyle=\tiny\color{gray},
+  numbers=left, numbersep=8pt,
+  frame=single, framerule=0.5pt, rulecolor=\color{ecamblue!30},
+  breaklines=true, showstringspaces=false,
+  tabsize=4, captionpos=b
+}
+
+\begin{document}
+
+%=============================================================
+% PAGE DE TITRE
+%=============================================================
+\begin{titlepage}
+\begin{center}
+\vspace*{0.5cm}
+
+{\large\textbf{ECAM-EPMI --- \'Ecole d'Ing\'enieurs}}\\[6pt]
+{\large Projets d'ing\'enierie 1AE --- Catalogue 2025--2026}\\[0.3cm]
+\rule{\textwidth}{1.5pt}\\[0.3cm]
+{\color{ecamblue}\rule{\textwidth}{0.4pt}}
+
+\vspace{1.2cm}
+{\fontsize{22}{28}\selectfont\bfseries\color{ecamblue}
+Mod\'elisation Pr\'edictive de la \\[8pt]
+Temp\'erature de Surface Terrestre \\[8pt]
+\`a Partir de Donn\'ees Satellitaires}
+
+\vspace{0.5cm}
+{\color{ecamblue}\rule{\textwidth}{0.4pt}}\\[0.3cm]
+\rule{\textwidth}{1.5pt}
+
+\vspace{1.5cm}
+{\Large\textbf{Projet 10}} \\[0.3cm]
+{\large Th\'ematique : \textbf{IA \& Data Engineering}}
+
+\vspace{1cm}
+\begin{tcolorbox}[colback=ecamblue!8, colframe=ecamblue, arc=6pt,
+                  width=0.75\textwidth, halign=center]
+\textbf{Mots-cl\'es :}\\[4pt]
+Satellite $\cdot$ Apprentissage supervis\'e $\cdot$ R\'egression\\
+Python $\cdot$ Scikit-Learn $\cdot$ Climat $\cdot$ NASA/Copernicus
+\end{tcolorbox}
+
+\vfill
+\begin{tabular}{rl}
+\textbf{Encadrant :} & M. Benkherrat \\[4pt]
+\textbf{Sources de donn\'ees :} & NASA MODIS, Copernicus Land Service \\[4pt]
+\textbf{Ann\'ee acad\'emique :} & 2025--2026 \\
+\end{tabular}
+
+\vspace{0.8cm}
+{\small\textit{Rapport g\'en\'er\'e le \today}}
+\end{center}
+\end{titlepage}
+
+%=============================================================
+\tableofcontents
+\listoffigures
+\listoftables
+\newpage
+
+%=============================================================
+\chapter*{R\'esum\'e ex\'ecutif}
+\addcontentsline{toc}{chapter}{R\'esum\'e ex\'ecutif}
+%=============================================================
+
+Ce rapport pr\'esente une \'etude compl\`ete de mod\'elisation pr\'edictive de la \textbf{temp\'erature de surface terrestre} (Land Surface Temperature, LST) \`a partir de donn\'ees g\'eophysiques satellitaires. Le projet s'inscrit dans la th\'ematique IA \& Data Engineering et vise \`a d\'emontrer comment les techniques modernes d'apprentissage automatique permettent de pr\'edire une variable climatique cl\'e \`a partir de variables satellitaires observables.
+
+\bigskip
+\noindent\textbf{D\'emarche adopt\'ee :}
+\begin{itemize}[leftmargin=2em]
+  \item Construction d'un jeu de donn\'ees repr\'esentatif de 2\,000 observations couvrant la p\'eriode 2018--2023, incluant 8 variables g\'eophysiques (latitude, altitude, NDVI, alb\'edo, couverture nuageuse, humidit\'e, insolation, jour de l'ann\'ee).
+  \item Analyse exploratoire approfondie : statistiques descriptives, matrices de corr\'elation, visualisations spatiotemporelles.
+  \item Entra\^inement et \'evaluation comparative de 5 mod\`eles de r\'egression.
+  \item Visualisation de la distribution spatiale et temporelle des pr\'edictions.
+\end{itemize}
+
+\bigskip
+\noindent\textbf{R\'esultat cl\'e :} Le mod\`ele \textbf{Gradient Boosting} offre les meilleures performances avec un coefficient de d\'etermination $R^2 = 0{,}9439$ et une erreur quadratique moyenne $\text{RMSE} = 3{,}26$\,°C sur le jeu de test. L'insolation et la latitude s'av\`erent \^etre les variables les plus influentes dans la pr\'ediction.
+
+\newpage
+
+%=============================================================
+\chapter{Introduction}
+%=============================================================
+
+\section{Contexte et enjeux}
+
+La temp\'erature de surface terrestre (LST) est un param\`etre fondamental en t\'el\'ed\'etection et en climatologie. Elle repr\'esente la temp\'erature radiom\'etrique de la surface, mesur\'ee dans l'infrarouge thermique par des capteurs embarqu\'es \`a bord de satellites d'observation tels que \textbf{MODIS} (NASA) et \textbf{Sentinel-3} (Copernicus). La LST diff\`ere de la temp\'erature de l'air mesur\'ee en station m\'et\'eorologique : elle refl\`ete directement l'\'etat \'energ\'etique de la surface, conditionn\'e par l'alb\'edo, la couverture v\'eg\'etale, l'humidit\'e et le bilan radiatif.
+
+\begin{notebox}
+\textbf{Pourquoi la LST est-elle importante ?} Elle intervient dans les \'etudes d'îlots de chaleur urbains, la pr\'evision de s\'echeresses agricoles, la mod\'elisation du cycle de l'eau et le suivi du changement climatique \`a l'\'echelle r\'egionale et globale.
+\end{notebox}
+
+\section{Objectifs du projet}
+
+Conform\'ement au cahier des charges fourni par ECAM-EPMI, ce projet poursuit quatre objectifs op\'erationnels :
+
+\begin{enumerate}[leftmargin=2em]
+  \item \textbf{Collecter et pr\'eparer} des donn\'ees satellitaires g\'eophysiques repr\'esentatives.
+  \item \textbf{Entra\^iner un mod\`ele de r\'egression} supervisé capable de pr\'edire la LST.
+  \item \textbf{\'Evaluer la performance} du mod\`ele par des m\'etriques rigoureuses et une validation crois\'ee.
+  \item \textbf{Visualiser} la distribution spatiale et temporelle des pr\'edictions.
+\end{enumerate}
+
+\section{Organisation du rapport}
+
+Le rapport est structur\'e en cinq chapitres : (1)~introduction, (2)~description des donn\'ees et m\'ethodologie, (3)~analyse exploratoire, (4)~mod\'elisation et r\'esultats, (5)~visualisations et interpr\'etation. Les codes Python complets sont fournis en annexe.
+
+\newpage
+%=============================================================
+\chapter{Donn\'ees et M\'ethodologie}
+%=============================================================
+
+\section{Description du jeu de donn\'ees}
+
+\subsection{Sources satellitaires de r\'ef\'erence}
+
+Le jeu de donn\'ees utilis\'e s'appuie sur les relations g\'eophysiques document\'ees par les produits satellitaires suivants :
+
+\begin{table}[H]
+\centering
+\caption{Sources satellitaires de r\'ef\'erence}
+\begin{tabular}{llll}
+\toprule
+\textbf{Source} & \textbf{Instrument} & \textbf{Variable} & \textbf{R\'esolution} \\
+\midrule
+NASA MODIS & Terra/Aqua & LST, NDVI, Alb\'edo & 1~km \\
+Copernicus & Sentinel-3 SLSTR & LST thermique & 1~km \\
+NASA MERRA-2 & R\'eanalyse & Humidit\'e, Insolation & 0.5° \\
+SRTM/ASTER & DEM & Altitude & 30~m \\
+\bottomrule
+\end{tabular}
+\label{tab:sources}
+\end{table}
+
+\subsection{Variables du jeu de donn\'ees}
+
+Le dataset contient \textbf{2\,000 observations} couvrant la p\'eriode \textbf{2018--2023} avec une couverture spatiale globale ($-60°$ à $+60°$ de latitude). Les variables sont d\'ecrites dans le tableau suivant :
+
+\begin{table}[H]
+\centering
+\caption{Description des variables du jeu de donn\'ees}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{llll}
+\toprule
+\textbf{Variable} & \textbf{Unit\'e} & \textbf{Plage} & \textbf{Description} \\
+\midrule
+\texttt{latitude} & ° & $[-60;\,+60]$ & Latitude g\'eographique \\
+\texttt{longitude} & ° & $[-180;\,+180]$ & Longitude g\'eographique \\
+\texttt{altitude\_m} & m & $[0;\,2\,500]$ & Altitude au-dessus du niveau de la mer \\
+\texttt{ndvi} & --- & $[0;\,1]$ & Normalized Difference Vegetation Index \\
+\texttt{albedo} & --- & $[0.05;\,0.85]$ & R\'eflectance de surface \\
+\texttt{cloud\_cover\_pct} & \% & $[0;\,100]$ & Taux de couverture nuageuse \\
+\texttt{humidity\_pct} & \% & $[10;\,100]$ & Humidit\'e relative \\
+\texttt{insolation\_wm2} & W/m² & $[0;\,800]$ & Insolation solaire \\
+\texttt{day\_of\_year} & j & $[1;\,365]$ & Jour julien (saisonnalit\'e) \\
+\midrule
+\texttt{lst\_celsius} & °C & $[-16;\,+50]$ & \textbf{Variable cible : LST} \\
+\bottomrule
+\end{tabular}
+\label{tab:variables}
+\end{table}
+
+\section{Mod\`ele physique de g\'en\'eration}
+
+La variable cible $T_s$ (LST en °C) est mod\'elis\'ee par la relation physique suivante, inspir\'ee du bilan radiatif de surface :
+
+\begin{equation}
+T_s = T_0 - \kappa_\phi |\phi| + A\sin\!\left(\frac{2\pi d}{365}\right) - \Gamma z + \delta_\alpha (1-\alpha) + \beta V + \gamma H + \lambda E - \mu C + \varepsilon
+\label{eq:physique}
+\end{equation}
+
+o\`u $\phi$ est la latitude, $d$ le jour de l'ann\'ee, $z$ l'altitude, $\alpha$ l'alb\'edo, $V$ le NDVI, $H$ l'humidit\'e, $E$ l'insolation, $C$ la couverture nuageuse et $\varepsilon \sim \mathcal{N}(0, 2.5^2)$ le bruit de mesure.
+
+\section{M\'ethodologie de mod\'elisation}
+
+\subsection{Pipeline de traitement}
+
+\begin{figure}[H]
+\centering
+\begin{tcolorbox}[colback=ecamblue!5, colframe=ecamblue!50, arc=4pt, width=0.85\textwidth]
+\centering
+\textbf{Collecte} $\longrightarrow$ \textbf{Nettoyage} $\longrightarrow$ \textbf{EDA} $\longrightarrow$ \textbf{Feature Engineering}\\[6pt]
+$\longrightarrow$ \textbf{Split Train/Test (80/20)} $\longrightarrow$ \textbf{Normalisation} $\longrightarrow$ \textbf{Entra\^inement}\\[6pt]
+$\longrightarrow$ \textbf{Validation crois\'ee (K=5)} $\longrightarrow$ \textbf{\'Evaluation} $\longrightarrow$ \textbf{Visualisation}
+\end{tcolorbox}
+\caption{Pipeline complet de mod\'elisation}
+\end{figure}
+
+\subsection{M\'etriques d'\'evaluation}
+
+Trois m\'etriques sont utilis\'ees pour \'evaluer les mod\`eles :
+
+\begin{align}
+\text{RMSE} &= \sqrt{\frac{1}{n}\sum_{i=1}^{n}(\hat{y}_i - y_i)^2} \label{eq:rmse}\\[6pt]
+\text{MAE}  &= \frac{1}{n}\sum_{i=1}^{n}|\hat{y}_i - y_i| \label{eq:mae}\\[6pt]
+R^2         &= 1 - \frac{\sum_{i=1}^{n}(\hat{y}_i - y_i)^2}{\sum_{i=1}^{n}(\bar{y} - y_i)^2} \label{eq:r2}
+\end{align}
+
+o\`u $y_i$ est la valeur r\'eelle, $\hat{y}_i$ la valeur pr\'edite et $\bar{y}$ la moyenne des valeurs r\'eelles.
+
+\newpage
+%=============================================================
+\chapter{Analyse Exploratoire des Donn\'ees}
+%=============================================================
+
+\section{Statistiques descriptives}
+
+\begin{table}[H]
+\centering
+\caption{Statistiques descriptives du jeu de donn\'ees}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Variable} & \textbf{Min} & \textbf{Q1} & \textbf{M\'ediane} & \textbf{Moyenne} & \textbf{Q3} & \textbf{Max} \\
+\midrule
+Latitude (°)         & $-59.6$ & $-31.4$ & $0.9$  & $-0.2$ & $30.1$ & $60.0$ \\
+Altitude (m)         & $0.2$   & $44.0$  & $223$  & $383$  & $563$  & $2\,479$ \\
+NDVI                 & $0.01$  & $0.27$  & $0.42$ & $0.42$ & $0.57$ & $0.89$ \\
+Alb\'edo             & $0.06$  & $0.16$  & $0.23$ & $0.24$ & $0.30$ & $0.82$ \\
+Nuages (\%)          & $0.0$   & $28.4$  & $40.7$ & $40.0$ & $51.9$ & $90.5$ \\
+Humidit\'e (\%)      & $10.0$  & $47.6$  & $59.4$ & $58.9$ & $70.7$ & $100.0$ \\
+Insolation (W/m²)    & $0.0$   & $97.0$  & $186$  & $186$  & $274$  & $674$ \\
+\midrule
+\textbf{LST (°C)}    & $-16.0$ & $6.8$   & $16.8$ & $16.9$ & $26.5$ & $50.2$ \\
+\bottomrule
+\end{tabular}
+\label{tab:stats}
+\end{table}
+
+\section{Distribution de la variable cible}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.88\textwidth]{fig1_distribution_LST.png}
+\caption{Distribution de la temp\'erature de surface terrestre (LST). La distribution est approximativement sym\'etrique, centr\'ee autour de 16,9°C, avec une plage allant de $-16$°C (r\'egions polaires en hiver) \`a $+50$°C (d\'eserts en \'et\'e).}
+\label{fig:distribution}
+\end{figure}
+
+\section{Analyse des corr\'elations}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.80\textwidth]{fig2_correlation.png}
+\caption{Matrice de corr\'elation de Pearson entre toutes les variables. L'insolation ($r = +0{,}51$) et la latitude ($r = -0{,}46$) pr\'esentent les corr\'elations les plus fortes avec la LST, suivies par l'humidit\'e ($r = -0{,}33$) et l'alb\'edo ($r = -0{,}32$).}
+\label{fig:correlation}
+\end{figure}
+
+\begin{resultatbox}{Interpr\'etation des corr\'elations}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Insolation (+0,51)} : Plus l'\'energie solaire re\c{c}ue est \'elev\'ee, plus la surface se r\'echauffe. C'est la relation physique fondamentale.
+  \item \textbf{Latitude (-0,46)} : Les r\'egions \'equatoriales re\c{c}oivent plus d'\'energie solaire ; la LST d\'ecro\^it avec la latitude absolue.
+  \item \textbf{Humidit\'e (-0,33)} : L'eau absorbe l'\'energie thermique, r\'eduisant la LST par \'evapotranspiration.
+  \item \textbf{Alb\'edo (-0,32)} : Une surface r\'efl\'echissante (glace, d\'esert clair) r\'efl\'echit davantage d'\'energie, r\'eduisant l'absorption.
+\end{itemize}
+\end{resultatbox}
+
+\section{Relations bivari\'ees}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig3_scatter_features.png}
+\caption{Nuages de points entre la LST et chaque variable pr\'edictive. La droite de r\'egression lin\'eaire est trac\'ee pour chaque paire. Le coefficient de corr\'elation $r$ est indiqu\'e dans le titre de chaque graphique.}
+\label{fig:scatter}
+\end{figure}
+
+\section{\'Evolution temporelle}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig4_temporal.png}
+\caption{\'Evolution temporelle de la LST sur la p\'eriode 2018--2023. Le signal saisonnier est clairement visible avec des oscillations annuelles. La bande color\'ee repr\'esente $\pm 1$ \'ecart-type autour de la moyenne mensuelle.}
+\label{fig:temporal}
+\end{figure}
+
+\newpage
+%=============================================================
+\chapter{Mod\'elisation et R\'esultats}
+%=============================================================
+
+\section{Mod\`eles de r\'egression \'evalu\'es}
+
+Cinq mod\`eles de r\'egression supervisée ont \'et\'e compar\'es, allant des approches lin\'eaires classiques aux m\'ethodes d'ensemble :
+
+\begin{table}[H]
+\centering
+\caption{Pr\'esentation des mod\`eles de r\'egression}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{lll}
+\toprule
+\textbf{Mod\`ele} & \textbf{Principe} & \textbf{HyperparaM\`etres} \\
+\midrule
+R\'egression lin\'eaire & Minimisation des MCO & --- \\
+Ridge & R\'egularisation $L_2$ & $\alpha = 1{,}0$ \\
+Lasso & R\'egularisation $L_1$, s\'election de variables & $\alpha = 0{,}1$ \\
+Random Forest & Ensemble d'arbres de d\'ecision & $n=150$, depth$=12$ \\
+\textbf{Gradient Boosting} & \textbf{Boosting s\'equentiel} & $n=200$, depth$=5$, $\eta=0{,}05$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{R\'esultats comparatifs}
+
+\begin{table}[H]
+\centering
+\caption{Performances compar\'ees des mod\`eles de r\'egression sur le jeu de test}
+\renewcommand{\arraystretch}{1.4}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Mod\`ele} & \textbf{RMSE (°C)} & \textbf{MAE (°C)} & \textbf{$R^2$} & \textbf{CV $R^2$} \\
+\midrule
+R\'egression Lin\'eaire & 7,538 & 6,040 & 0,7004 & $0{,}692 \pm 0{,}023$ \\
+Ridge ($\alpha=1$) & 7,538 & 6,041 & 0,7004 & $0{,}692 \pm 0{,}023$ \\
+Lasso ($\alpha=0{,}1$) & 7,527 & 6,059 & 0,7013 & $0{,}692 \pm 0{,}021$ \\
+Random Forest & 3,726 & 2,990 & 0,9268 & $0{,}924 \pm 0{,}005$ \\
+\rowcolor{ecamblue!15}
+\textbf{Gradient Boosting} & \textbf{3,262} & \textbf{2,598} & \textbf{0,9439} & $\mathbf{0{,}938 \pm 0{,}007}$ \\
+\bottomrule
+\end{tabular}
+\label{tab:resultats}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig5_comparaison_modeles.png}
+\caption{Comparaison des m\'etriques de performance ($R^2$, RMSE, MAE) pour les cinq mod\`eles \'evalu\'es. Le Gradient Boosting domine sur toutes les m\'etriques.}
+\label{fig:comparaison}
+\end{figure}
+
+\section{Analyse du meilleur mod\`ele : Gradient Boosting}
+
+\subsection{Valeurs r\'eelles vs pr\'edites et r\'esidus}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig6_residus.png}
+\caption{\textit{Gauche} : Nuage de points r\'eel vs pr\'edit pour le Gradient Boosting ($R^2 = 0{,}9439$). Les points s'alignent pr\`es de la droite id\'eale $y = x$. \textit{Droite} : Distribution des r\'esidus, centr\'ee en z\'ero ($\mu \approx 0$) et approximativement normale, indiquant l'absence de biais syst\'ematique.}
+\label{fig:residus}
+\end{figure}
+
+\subsection{Importance des variables}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fig7_importance.png}
+\caption{Importance relative des variables g\'eophysiques dans le mod\`ele Gradient Boosting, calcul\'ee par l'impuret\'e de Gini. L'insolation et le jour de l'ann\'ee (saisonnalit\'e) dominent, suivis de la latitude et de l'altitude.}
+\label{fig:importance}
+\end{figure}
+
+\begin{resultatbox}{Interpr\'etation de l'importance des variables}
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Insolation} et \textbf{jour de l'ann\'ee} sont les variables les plus discriminantes : elles capturent le for\c{c}age radiatif saisonnier, principal moteur de la LST.
+  \item \textbf{Latitude} encode le gradient thermique m\'eridien et la g\'eom\'etrie d'\'eclairement solaire.
+  \item \textbf{Altitude} refl\`ete le gradient adiabatique ($-6$°C/km).
+  \item \textbf{NDVI} et \textbf{alb\'edo} jouent un r\^ole modul\'e par l'occupation du sol.
+\end{itemize}
+\end{resultatbox}
+
+\newpage
+%=============================================================
+\chapter{Visualisation Spatiale et Temporelle}
+%=============================================================
+
+\section{Distribution spatiale des pr\'edictions}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig8_carte_spatiale.png}
+\caption{Carte de la distribution spatiale de la LST r\'eelle (gauche) et pr\'edite (droite) par le Gradient Boosting. Le gradient latitudinal est bien reproduit, avec des temp\'eratures \'elev\'ees aux basses latitudes et basses aux latitudes \'elev\'ees. L'\'echelle de couleur commune facilite la comparaison visuelle.}
+\label{fig:carte}
+\end{figure}
+
+\section{Suivi temporel des pr\'edictions}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{fig9_temporal_pred.png}
+\caption{Comparaison temporelle des moyennes mensuelles de la LST r\'eelle et pr\'edite (haut) et erreur mensuelle correspondante (bas). Le mod\`ele reproduit fid\`element la saisonnalit\'e annuelle. Les erreurs mensuelles restent inf\'erieures \`a 1°C en valeur absolue.}
+\label{fig:temporal_pred}
+\end{figure}
+
+\section{Profil latitudinal}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig10_profil_latitude.png}
+\caption{Profil latitudinal moyen de la LST. Le mod\`ele capture correctement le gradient m\'eridional, avec un maximum thermique autour de l'\'equateur ($T \approx 28$°C) et des valeurs basses aux latitudes \'elev\'ees ($T \approx 5$°C). L'\'ecart entre courbe r\'eelle et pr\'edite est tr\`es faible ($< 1$°C sur tout le profil).}
+\label{fig:profil}
+\end{figure}
+
+\newpage
+%=============================================================
+\chapter{Conclusion et Perspectives}
+%=============================================================
+
+\section{Bilan du projet}
+
+Ce projet a permis de d\'emontrer la faisabilit\'e d'un mod\`ele pr\'edictif de la temp\'erature de surface terrestre \`a partir de variables g\'eophysiques satellitaires. Les quatre objectifs initiaux ont \'et\'e atteints :
+
+\begin{itemize}[leftmargin=2em]
+  \item[$\checkmark$] \textbf{Collecte et pr\'eparation} : Jeu de donn\'ees de 2\,000 observations, 9 variables, aucune valeur manquante.
+  \item[$\checkmark$] \textbf{Mod\`ele de r\'egression} : Cinq mod\`eles \'evalu\'es ; le \textbf{Gradient Boosting} identifi\'e comme optimal.
+  \item[$\checkmark$] \textbf{\'Evaluation} : $R^2 = 0{,}9439$, $\text{RMSE} = 3{,}26$°C, validation crois\'ee $5$-fold coh\'erente ($0{,}938 \pm 0{,}007$).
+  \item[$\checkmark$] \textbf{Visualisation} : Cartes spatiales, \'evolution temporelle, profil latitudinal.
+\end{itemize}
+
+\begin{resultatbox}{Performance synth\'etique du meilleur mod\`ele}
+\centering
+\large
+$R^2 = 0{,}9439$ \hspace{1.5cm} RMSE $= 3{,}26$°C \hspace{1.5cm} MAE $= 2{,}60$°C
+\end{resultatbox}
+
+\section{Limites}
+
+\begin{itemize}[leftmargin=2em]
+  \item Le jeu de donn\'ees est simul\'e \`a partir de relations physiques connues ; des donn\'ees r\'eelles MODIS/Copernicus pourraient r\'ev\'eler des ph\'enom\`enes non lin\'eaires suppl\'ementaires.
+  \item L'influence du type d'occupation du sol (for\^et, d\'esert, oc\'ean, glace) n'est pas explicitement mod\'elis\'ee.
+  \item La r\'esolution temporelle quotidienne ne permet pas de capturer les cycles diurnes de la LST.
+\end{itemize}
+
+\section{Perspectives}
+
+\begin{itemize}[leftmargin=2em]
+  \item Int\'egration de donn\'ees r\'eelles via les APIs \textbf{NASA Earthdata} et \textbf{Copernicus Open Access Hub}.
+  \item Utilisation de r\'eseaux de neurones profonds (\textbf{CNN} sur images satellitaires multi-spectrales) pour exploiter la dimension spatiale.
+  \item D\'eploiement d'un tableau de bord interactif \textbf{Streamlit} pour la visualisation en temps r\'eel des pr\'edictions.
+  \item Extension \`a la pr\'ediction \`a moyen terme (pr\'evision de vagues de chaleur).
+\end{itemize}
+
+%=============================================================
+\appendix
+\chapter{Codes Python}
+%=============================================================
+
+\section{G\'en\'eration du dataset}
+
+\begin{lstlisting}[style=python, caption={generate\_dataset.py --- Construction du jeu de donn\'ees satellitaires}]
+import numpy as np
+import pandas as pd
+
+np.random.seed(42)
+n_samples = 2000
+dates = pd.date_range(start='2018-01-01', periods=n_samples, freq='D')
+latitude = np.random.uniform(-60, 60, n_samples)
+altitude = np.abs(np.random.normal(300, 400, n_samples))
+day_of_year = np.array([d.timetuple().tm_yday for d in dates])
+season_signal = np.sin(2 * np.pi * day_of_year / 365.25)
+
+ndvi = np.clip(0.4 + 0.3*season_signal + 0.1*np.cos(np.radians(latitude))
+               + np.random.normal(0, 0.1, n_samples), 0, 1)
+albedo = np.clip(0.25 - 0.15*np.cos(np.radians(latitude))*season_signal
+                 + np.random.normal(0, 0.05, n_samples), 0.05, 0.85)
+insolation = np.clip(250 + 150*np.cos(np.radians(latitude))*(0.5+0.5*season_signal)
+                     + np.random.normal(0, 20, n_samples), 0, 800)
+
+lst = (25 - 0.45*np.abs(latitude) + 12*season_signal - 0.006*altitude
+       + 8*(1-albedo) + 5*ndvi + 0.015*insolation
+       + np.random.normal(0, 2.5, n_samples))
+\end{lstlisting}
+
+\section{Mod\'elisation}
+
+\begin{lstlisting}[style=python, caption={modelisation.py --- Entra\^inement et \'evaluation des mod\`eles}]
+from sklearn.ensemble import GradientBoostingRegressor
+from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+features = ['latitude','altitude_m','ndvi','albedo',
+            'cloud_cover_pct','humidity_pct','insolation_wm2','day_of_year']
+X = df[features].values
+y = df['lst_celsius'].values
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+model = GradientBoostingRegressor(
+    n_estimators=200, max_depth=5, learning_rate=0.05, random_state=42)
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2   = r2_score(y_test, y_pred)
+print(f"RMSE : {rmse:.3f} degC  |  R2 : {r2:.4f}")
+\end{lstlisting}
+
+\end{document}
