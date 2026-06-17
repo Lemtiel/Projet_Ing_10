@@ -405,12 +405,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-col_map, col_params = st.columns([2.3, 2])
+col_map, col_params = st.columns([2.5, 2])
 
 with col_map:
     m_input = folium.Map(
-        location=st.session_state["map_center"],
-        zoom_start=st.session_state["map_zoom"]
+        location=[20, 0],
+        zoom_start=2
     )
     if st.session_state["clicked_location"] is not None:
         folium.Marker(
@@ -426,6 +426,7 @@ with col_map:
     m_input,
     key="main_map",
     height=400,
+    width=900,
     returned_objects=[
         "last_clicked",
         "center",
