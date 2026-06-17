@@ -36,12 +36,10 @@ if "confidence" not in st.session_state:
 if "clicked_location" not in st.session_state:
     st.session_state["clicked_location"] = None
 
-if "map_center" not in st.session_state:
-    st.session_state["map_center"] = [20, 0]
 
-if "map_zoom" not in st.session_state:
-    st.session_state["map_zoom"] = 2
 
+if "prediction_result" not in st.session_state:
+    st.session_state.prediction_result = None
 
 # ── Load models ─────────────────────────────
 @st.cache_resource
@@ -403,11 +401,11 @@ st.markdown(
 )
 st.markdown("---")
 st.markdown(
-    "<p style='text-align:center;'>Cliquez sur la carte ou entrez les coordonnées manuellement.</p>",
+    "<p style='text-align:center;'>choisissez un emplacement sur la carte ou entrez les coordonnées manuellement.</p>",
     unsafe_allow_html=True
 )
 
-col_map, col_params = st.columns([2.5, 2])
+col_map, col_params = st.columns([2.3, 2])
 
 with col_map:
     m_input = folium.Map(
@@ -434,16 +432,6 @@ with col_map:
         "zoom"
     ])
 
-    # Sauvegarde de la vue actuelle
-    if map_data.get("center"):
-        st.session_state["map_center"] = [
-            map_data["center"]["lat"],
-            map_data["center"]["lng"]
-        ]
-
-    if map_data.get("zoom"):
-        st.session_state["map_zoom"] = map_data["zoom"]
-
     # Sauvegarde du clic
     if map_data.get("last_clicked"):
         st.session_state["clicked_location"] = [
@@ -451,6 +439,11 @@ with col_map:
             map_data["last_clicked"]["lng"]
         ]
 
+    if map_data and map_data.get("last_clicked"):
+        st.session_state.clicked_location = [
+            map_data["last_clicked"]["lat"],
+            map_data["last_clicked"]["lng"]
+        ]
     # Récupération des coords depuis le clic carte
 
     if "selected_lat" not in st.session_state:
@@ -489,6 +482,70 @@ with col_params:
     if predict_btn:
         st.session_state.prediction_done = True
 
+def validate_inputs(lat, lon, altitude, ndvi, albedo, cloud):
+    errors = []
+
+    if not (-90 <= lat <= 90):
+        errors.append("Latitude invalide (-90 à 90).")
+
+    if not (-180 <= lon <= 180):
+        errors.append("Longitude invalide (-180 à 180).")
+
+    if altitude < 0:
+        errors.append("Altitude négative impossible.")
+
+    if not (-0.2 <= ndvi <= 1):
+        errors.append("NDVI hors limites physiques.")
+
+    if not (0 <= albedo <= 1):
+        errors.append("Albedo doit être compris entre 0 et 1.")
+
+    if not (0 <= cloud <= 100):
+        errors.append("Couverture nuageuse doit être comprise entre 0 et 100 %.")
+
+    # Cas incohérents
+
+    if ndvi > 0.8 and albedo < 0.05:
+        errors.append(
+            "Scénario peu réaliste : végétation très dense avec albedo extrêmement faible."
+        )
+
+    if altitude > 6000 and ndvi > 0.7:
+        errors.append(
+            "Scénario peu réaliste : végétation dense à très haute altitude."
+        )
+
+    if altitude > 5000 and cloud == 0:
+        errors.append(
+            "Scénario atypique : haute montagne avec absence totale de couverture nuageuse."
+        )
+
+    return errors
+
+errors = validate_inputs(
+    lat,
+    lon,
+    altitude,
+    ndvi,
+    albedo,
+    cloud
+)
+if errors:
+    st.info(
+        """
+        ⚠️ Certains paramètres semblent incohérents.
+
+        Vérifiez :
+        - latitude / longitude
+        - altitude
+        - NDVI
+        - albedo
+        - couverture nuageuse
+
+        Les prédictions hors domaine d'apprentissage peuvent être peu fiables.
+        """
+    )
+
 # ══════════════════════════════════════════════════════════════
 # PRÉDICTION + RÉSULTATS
 # ══════════════════════════════════════════════════════════════
@@ -517,6 +574,35 @@ if predict_btn:
 
     zone_name = le.inverse_transform([zone_encoded])[0]
     confidence = zone_proba.max()
+
+    st.session_state.prediction_result = {
+    "lst_pred": lst_pred,
+    "zone_name": zone_name,
+    "confidence": confidence,
+    "lat": lat,
+    "lon": lon,
+    "altitude": altitude,
+    "ndvi": ndvi,
+    "albedo": albedo,
+    "cloud": cloud,
+    "date": selected_date
+}
+    
+    if st.session_state.prediction_result:
+
+        result = st.session_state.prediction_result
+
+        lst_pred = result["lst_pred"]
+        zone_name = result["zone_name"]
+        confidence = result["confidence"]
+
+        lat = result["lat"]
+        lon = result["lon"]
+
+        altitude = result["altitude"]
+        ndvi = result["ndvi"]
+        albedo = result["albedo"]
+        cloud = result["cloud"]
 
     # Couleur de la zone
     zone_color = ZONE_COLORS.get(zone_name, "#888888")
@@ -552,7 +638,7 @@ if predict_btn:
         f"<div style='background:{zone_color}22;border-left:4px solid {zone_color};"
         f"padding:10px 14px;border-radius:4px;margin:8px 0'>"
         f"<b style='color:{zone_color}'>{zone_name.replace('_',' ')}</b> — "
-        f"LST moy. {stats.get('mean','?'):.1f}°C | plage {stats.get('min','?')}→{stats.get('max','?')}°C | "
+        f"LST moy. {stats.get('mean','?'):.1f}°C    |    plage {stats.get('min','?')}→{stats.get('max','?')}°C    |    "
         f"σ = ±{stats.get('std','?'):.1f}°C"
         f"</div>",
         unsafe_allow_html=True
@@ -631,4 +717,4 @@ if predict_btn:
     st.session_state.confidence = confidence
     st.session_state.prediction_done = True
 else:
-    st.info("Veuillez sélectionner un emplacement sur la carte et cliquer sur 'Prédire'.")
+    st.info("Veuillez saisir des entrées valides.")
