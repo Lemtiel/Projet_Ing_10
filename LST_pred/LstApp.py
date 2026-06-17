@@ -389,7 +389,7 @@ def build_similar_zones_map(predicted_zone: str, user_lat: float, user_lon: floa
 
 # ══════════════════════════════════════════════════════════════
 # UI PRINCIPALE
-# ══════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════════════════════
 st.markdown(
     "<h1 style='text-align:center;color:orange;'>🌍 GLOBAL HEAT RISK SIMULATOR 🌡️</h1>",
     unsafe_allow_html=True
