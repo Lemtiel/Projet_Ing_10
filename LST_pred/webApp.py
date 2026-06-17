@@ -8,8 +8,8 @@ from datetime import date
 
 # ── Config ──────────────────────────────────
 st.set_page_config(
-    page_title="LST Predictor",
-    page_icon="🌍",
+    page_title="Test LST version 2.1",
+    page_icon="🌡️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
@@ -402,9 +402,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 st.markdown("---")
+st.markdown(
+    "<p style='text-align:center;'>Cliquez sur la carte ou entrez les coordonnées manuellement.</p>",
+    unsafe_allow_html=True
+)
 
-
-col_map, col_params = st.columns([2.3, 2])
+col_map, col_params = st.columns([2.5, 2])
 
 with col_map:
     m_input = folium.Map(
