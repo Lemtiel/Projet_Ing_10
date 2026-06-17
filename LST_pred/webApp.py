@@ -8,8 +8,8 @@ from datetime import date
 
 # ── Config ──────────────────────────────────
 st.set_page_config(
-    page_title="LST Predictor",
-    page_icon="🌍",
+    page_title="Test LST version 2.1",
+    page_icon="🌡️",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
