@@ -405,7 +405,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-col_map, col_params = st.columns([2.5, 2])
+col_map, col_params = st.columns([2.3, 2])
 
 with col_map:
     m_input = folium.Map(
@@ -426,7 +426,7 @@ with col_map:
     m_input,
     key="main_map",
     height=400,
-    width=900,
+    width=800,
     returned_objects=[
         "last_clicked",
         "center",
@@ -492,8 +492,8 @@ def validate_inputs(lat, lon, altitude, ndvi, albedo, cloud):
     if not (-180 <= lon <= 180):
         errors.append("Longitude invalide (-180 à 180).")
 
-    if altitude < 0:
-        errors.append("Altitude négative impossible.")
+    if not (0 <= altitude <= 8849):
+        errors.append("Altitude invalide (0 à 8849 m).")
 
     if not (-0.2 <= ndvi <= 1):
         errors.append("NDVI hors limites physiques.")
