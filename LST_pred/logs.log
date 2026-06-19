@@ -6748,3 +6748,11 @@ Alternately, you can install this by running `pip install pycaret[models]`
                        oob_score=False, random_state=42, verbose=0,
                        warm_start=False)
 2026-06-16 00:53:07,479:INFO:create_model() successfully completed......................................
+2026-06-17 05:25:49,873:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2026-06-17 05:25:49,919:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2026-06-17 05:25:49,919:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
+2026-06-17 05:25:49,919:WARNING:
+'cuml' is a soft dependency and not included in the pycaret installation. Please run: `pip install cuml` to install.
