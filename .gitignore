@@ -4,3 +4,8 @@ fax_Cabrel/
 # Ignore trash folder inside LST_pred
 LST_pred/trash/
 LST_pred/logs.log
+
+# Ne prendre en compte que le word
+LST_pred/
+CATALOGUE_PROJETS_INGENIERIE_1AE_2025-2026_VF (2).pdf
+README.md
