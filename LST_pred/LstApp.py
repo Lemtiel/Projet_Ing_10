@@ -47,8 +47,20 @@ def load_models():
     reg_model = joblib.load("rf_lst_model_cv.pkl")
     clf_model = joblib.load("rf_region_classifier.pkl")
     le = joblib.load("label_encoder.pkl")
-    return reg_model, clf_model, le
+    
+    # 🩹 FIX CHIRURGICAL : Injection des attributs manquants pour compatibilité de version
+    # On inspecte le pipeline du reg_model pour réparer le SimpleImputer s'il a perdu son attribut
+    if hasattr(reg_model, "named_steps") and "preprocessor" in reg_model.named_steps:
+        preprocessor = reg_model.named_steps["preprocessor"]
+        if hasattr(preprocessor, "transformers_"):
+            for name, transformer, columns in preprocessor.transformers_:
+                if hasattr(transformer, "named_steps") and "imputer" in transformer.named_steps:
+                    imputer = transformer.named_steps["imputer"]
+                    if not hasattr(imputer, "_fill_dtype"):
+                        # On lui donne la valeur par défaut attendue par les anciennes versions (None ou float)
+                        imputer._fill_dtype = np.float64
 
+    return reg_model, clf_model, le
 @st.cache_data
 def load_dataset():
     df = pd.read_csv("Dataset_LST_Massive_20k.csv")
